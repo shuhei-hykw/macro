@@ -1,0 +1,11 @@
+#gitignore
+
+*.[doa]
+*~
+*.root
+*.png
+*.pdf
+*.so
+*.pcm
+*.pyc
+\#*
