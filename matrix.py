@@ -21,7 +21,7 @@ if __name__ == '__main__':
   parser.add_argument('run_number', type=int, help='root_file')
   parsed, unpased = parser.parse_known_args()
   print('run{0:05d} '.format(parsed.run_number) + '_' * 60)
-  fig_file = EnvManager.fig_dir + '/dc/matrix.pdf'
+  fig_file = EnvManager.fig_dir + '/dc/matrix.ps'
   if parsed.run_number < 1000:
     root_file = 'HUL_{0:05d}.root'.format(parsed.run_number)
     f1 = TFile.Open(EnvManager.root_dir + '/' + root_file)
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     t2 = f2.Get('ea0c')
     t1.AddFriend( t2 )
   c1 = TCanvas('c1', 'c1')
-  h = TH2F('h', 'h', 64, 0, 64, 24, 0, 24)
+  h = TH2F('h', 'h;SCH segment;TOF segment;Counts', 64, 0, 64, 24, 0, 24)
   h2d = TH2F('h2d', 'h2d', 64, 1, 65, 24, 1, 25)
   h3d = TH2F('h3d', 'h3d', 64, 1, 65, 24, 1, 25)
   matrix2d_param = EnvManager.param_dir + '/MATRIX/matrix2d_pattern_20170418.txt'
@@ -92,10 +92,9 @@ if __name__ == '__main__':
     #t1.Project('h', 'kk.TofSeg[0]-1:ea0c.sch_hitpat[0]')
   # t1.Project('h', 'kk.TofSeg[0]:ea0c.sch_hitpat[0]',
   #            'kk.trigflag[5]>0 && ea0c.fbh_hitpat[0]=={}'.format(int(target_fbh)))
-  h.SetXTitle('SCH segment')
-  h.SetYTitle('TOF segment')
   # h.SetZTitle('Counts')
   #h.Draw('box')
+  h.GetZaxis().SetTitleOffset(0.4)
   h.Draw('colz')
   line2d = TLine()
   line2d.SetLineColor(kRed+1)

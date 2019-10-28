@@ -4,7 +4,7 @@
 import ROOT
 
 #_______________________________________________________________________________
-def set_style(h, myfont=42):
+def set_style(h, myfont=132):
   h.SetLineColor(1)
   h.SetLabelFont(myfont, 'xyz')
   h.SetTitleFont(myfont, 'xyz')

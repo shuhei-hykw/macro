@@ -11,8 +11,8 @@ import ROOT
 from ROOT import (gPad, gROOT, gStyle, kRed, kBlue, kGray, TArrow,
                   TCanvas, TCut, TF1, TFile, TH1F, TLatex, TLine, TPad)
 
-flag = 'at'
-#flag = 'de'
+#flag = 'at'
+flag = 'de'
 #flag = 'time'
 #flag = 'residual'
 #flag = 'chisqr'
@@ -104,6 +104,9 @@ if __name__ == '__main__':
   elif flag == 'de':
     tdc_file = EnvManager.fig_dir + '/dc/ssd1de.ps'
     tree = f1.Get('ssd')
+    tree.SetBranchStatus('*', 0)
+    tree.SetBranchStatus('ssd1y1ncl', 1)
+    tree.SetBranchStatus('ssd1y1clde', 1)
     h1 = TH1F('h1', 'h1;Cluster #DeltaE [arb. unit];Counts', 250, 0.0, 4.0e4)
     h2 = h1.Clone('h2')
     l = 'ssd1y1'
@@ -111,16 +114,17 @@ if __name__ == '__main__':
       tree.GetEntry(i)
       for j in range(tree.ssd1y1ncl):
         h1.Fill(tree.ssd1y1clde[j])
-        if tree.ssd1y1ncl == 1:
+        if tree.ssd1y1ncl == 1 and tree.ssd1y1clde[j] > 2500:
           h2.Fill(tree.ssd1y1clde[j])
     # tree.Project('h1', '{}clde'.format(l), '0<{}clde && {}clde<5e4'.format(l, l))
     # tree.Project('h2', '{}clde'.format(l), '{}clde>2500&&abs({}cltime-90)<30'.format(l, l))
     #tree.Project('h2', 'ssd1x0clde/1e4', 'ssd1x1ncl==1&&ssd1y0ncl==1&&ssd1y1ncl==1')
     c1 = TCanvas()
     h1.GetXaxis().SetNdivisions(505)
-    h1.Draw()
-    h2.Draw('same')
-    draw_cut_line(h1, [2500])
+    # h1.Draw()
+    # h2.Draw('same')
+    h2.Draw()
+    # draw_cut_line(h1, [2500])
     # h2.Draw('same')
     # #h2.Draw()
     # h2.SetFillColor(ROOT.kGray)

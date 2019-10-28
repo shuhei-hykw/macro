@@ -18,8 +18,8 @@ draw_line = True
 
 target_line = [None, None]
 
-#ext = '.ps'
-ext = '.pdf'
+ext = '.ps'
+#ext = '.pdf'
 
 cut_line = []
 
@@ -210,7 +210,16 @@ if __name__ == '__main__':
   hstyle.set_style(h1)
   h1.SetXTitle('Mean #DeltaE SSD1 [arb. unit]')
   h1.SetYTitle('Counts [/750 arb. unit]')
+  h1.GetXaxis().SetRangeUser(0, 100000)
   h1.Draw()
+  h2 = f1.Get('h3416')
+  hstyle.set_style(h2)
+  h2.SetBinContent(1,0)
+  h2.Scale(h1.GetMaximum()/h2.GetMaximum())
+  h2.Draw('hist same')
+  tex.SetTextSize(0.07)
+  tex.DrawLatexNDC(0.27, 0.83, '#font[12]{K}^{#plus}')
+  tex.DrawLatexNDC(0.47, 0.83, '#Xi^{#minus}')
   c1.Print('fig/dc/xi_de' + ext)
   '''mom/de'''
   h1 = f1.Get('h6508')

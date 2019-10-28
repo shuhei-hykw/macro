@@ -15,8 +15,8 @@ from ROOT import (gPad, gROOT, gStyle, kRed, kBlue, TArrow,
 #flag = 'ub'
 flag = 'ub2'
 
-#ext = '.ps'
-ext = '.pdf'
+ext = '.ps'
+#ext = '.pdf'
 
 cut_line = [None, None]
 
@@ -103,14 +103,14 @@ if __name__ == '__main__':
   '''ub'''
   h1.Draw()
   fig_file = EnvManager.fig_dir + '/dc/btof_ub' + ext
-  tex.DrawLatex(0.4, h1.GetMaximum()*0.9, 'K^{#minus}')
+  tex.DrawLatex(0.3, h1.GetMaximum()*0.9, '#font[12]{K}^{#minus}')
   tex.DrawLatex(1.2, h1.GetMaximum()*0.2, '#pi^{#minus}')
   c1.Print(fig_file)
   print('print ' + fig_file)
   '''ub2'''
   h12.Draw()
   fig_file = EnvManager.fig_dir + '/dc/btof_ub2' + ext
-  tex.DrawLatex(0.4, h12.GetMaximum()*0.9, 'K^{#minus}')
+  tex.DrawLatex(0.4, h12.GetMaximum()*0.9, '#font[12]{K}^{#minus}')
   tex.DrawLatex(1.2, h12.GetMaximum()*0.2, '#pi^{#minus}')
   c1.Print(fig_file)
   print('print ' + fig_file)

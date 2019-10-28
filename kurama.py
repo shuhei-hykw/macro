@@ -15,16 +15,17 @@ from ROOT import (gPad, gROOT, gStyle, kRed, kBlue, kGray, TArrow,
 
 #flag = 'p'
 #flag = 'stof'
+flag = 'tofde'
 #flag = 'm'
 #flag = 'm2'
-flag = 'm2p'
+#flag = 'm2p'
 #flag = 'residual'
 #flag = 'chisqr'
 #flag = 'eff'
 #draw_line = True
 
-#ext = '.ps'
-ext = '.pdf'
+ext = '.ps'
+#ext = '.pdf'
 
 cut_line = []
 
@@ -286,6 +287,29 @@ if __name__ == '__main__':
     #                  cut, h1.GetMaximum()*0, 0.02, '>')
     # c1.Modified()
     # c1.Update()
+    c1.Print(tdc_file)
+    print(tdc_file)
+  elif flag == 'tofde':
+    tdc_file = EnvManager.fig_dir + '/dc/tofde' + ext
+    t1 = f1.Get('kurama')
+    h1 = TH2F('h1', 'h1;TOF #DeltaE;Squared mass [GeV/#font[42]{c}^{2}]',
+              100, 0, 6, 100, -0.2, 1.2)
+    t1.SetBranchStatus('*', 0)
+    t1.SetBranchStatus('trigflag', 1)
+    t1.SetBranchStatus('nhTof', 1)
+    t1.SetBranchStatus('deTof', 1)
+    t1.SetBranchStatus('ntKurama', 1)
+    t1.SetBranchStatus('qKurama', 1)
+    t1.SetBranchStatus('chisqrKurama', 1)
+    t1.SetBranchStatus('m2', 1)
+    for i in range(t1.GetEntries()):
+      t1.GetEntry(i)
+      if t1.ntKurama != 1 or t1.nhTof != 1:
+        continue
+      h1.Fill(t1.deTof[0], t1.m2[0])
+    c1 = TCanvas()
+    h1.Draw('colz')
+    #draw_cut_line(h1, [30])
     c1.Print(tdc_file)
     print(tdc_file)
   elif flag == 'eff':
