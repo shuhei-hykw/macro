@@ -6,44 +6,16 @@ import argparse
 import os
 import sys
 
-from ROOT import (
-  TCanvas, TGraph, TLegend, TMath, TString, TSystem, TText, TTimeStamp,
-  gApplication, gROOT, gSystem,
-  kMagenta, kCyan, kRed, kBlue, kGreen, kOrange, kBlack
-)
-
 interval = 10 # [sec]
 target_jobs = ['s', 'l', 'h']
 
 #_______________________________________________________________________________
-def sleep(sec=interval):
-  now = TTimeStamp()
-  while not gSystem.ProcessEvents():
-    if TTimeStamp().GetSec() - now.GetSec() > sec:
-      return
-
-#_______________________________________________________________________________
-def process_command(command):
-  pipe = gSystem.OpenPipe(command, 'r')
-  line = TString()
-  if line.Gets(pipe):
-    gSystem.ClosePipe(pipe)
-    return int(line.Data())
-  else:
-    return 0
-
-#_______________________________________________________________________________
-if __name__ == '__main__':
-  parser = argparse.ArgumentParser()
-  parser.add_argument('--batch', '-b', action='store_true',
-                      default=False, help='batch mode option')
-  parsed, unparsed = parser.parse_known_args()
-  gROOT.Reset()
-  if parsed.batch:
-    gROOT.SetBatch(True)
-  c1 = TCanvas('c1', '{0}@{1}'.format(gSystem.Getenv('USER'),
-                                      gSystem.Getenv('HOSTNAME')),
-               500, 500)
+def monitor(batch=False):
+  ROOT.gROOT.SetBatch(batch)
+  c1 = ROOT.TCanvas('c1', '{} -- {}@{}'.format(os.path.basename(__file__),
+                                               ROOT.gSystem.Getenv('USER'),
+                                               ROOT.gSystem.Getenv('HOSTNAME')),
+                    500, 500)
   c1.SetTopMargin(0.050)
   name = []
   command = []
@@ -55,14 +27,15 @@ if __name__ == '__main__':
   NumOfGraph = len(name)
   NumOfPlot  = 100
   njobs = [[0 for i in range(NumOfPlot)] for j in range(NumOfGraph)]
-  color = [kMagenta, kCyan, kRed, kBlue, kGreen, kOrange]
+  color = [ROOT.kMagenta, ROOT.kCyan, ROOT.kRed,
+           ROOT.kBlue, ROOT.kGreen, ROOT.kOrange]
   unix_time = []
-  now = TTimeStamp()
-  now.Add(TTimeStamp(-now.GetZoneOffset()))
+  now = ROOT.TTimeStamp()
+  now.Add(ROOT.TTimeStamp(-now.GetZoneOffset()))
   for ip in range(NumOfPlot):
     unix_time.append(now.GetSec() + interval * (ip - NumOfPlot))
-  graphs = [TGraph() for i in range(NumOfGraph)]
-  leg = TLegend(0.150, 0.150, 0.340, 0.500)
+  graphs = [ROOT.TGraph() for i in range(NumOfGraph)]
+  leg = ROOT.TLegend(0.150, 0.150, 0.340, 0.500)
   leg.SetTextAlign(12)
   leg.SetTextSize(0.040)
   for ig, g in enumerate(graphs):
@@ -72,7 +45,7 @@ if __name__ == '__main__':
     leg.AddEntry(g, name[ig], 'L')
     g.Draw('AL') if ig==0 else g.Draw('L')
   leg.Draw()
-  text = TText(0.150, 0.850, '')
+  text = ROOT.TText(0.150, 0.850, '')
   text.SetNDC(1)
   text.SetTextFont(42)
   text.Draw()
@@ -80,7 +53,7 @@ if __name__ == '__main__':
     while True:
       print(now.AsString('s'))
       now.Set()
-      now.Add(TTimeStamp(-now.GetZoneOffset()))
+      now.Add(ROOT.TTimeStamp(-now.GetZoneOffset()))
       unix_time.pop(0)
       unix_time.append(now.GetSec())
       max_jobs = 0
@@ -91,7 +64,7 @@ if __name__ == '__main__':
         njobs[ig].append(val)
         for ip, u in enumerate(unix_time):
           graphs[ig].SetPoint(ip, u, njobs[ig][ip])
-          max_jobs = TMath.Max(max_jobs, njobs[ig][ip])
+          max_jobs = ROOT.TMath.Max(max_jobs, njobs[ig][ip])
         graphs[ig].GetXaxis().SetTimeDisplay(1)
         graphs[ig].GetXaxis().SetLabelOffset(0.04)
         graphs[ig].GetXaxis().SetTimeFormat('#splitline{%Y/%m/%d}{  %H:%M:%S}')
@@ -104,7 +77,35 @@ if __name__ == '__main__':
       c1.Modified()
       c1.Update()
       print('')
-      sleep()
+      sleep(interval)
   except KeyboardInterrupt:
     print('Ctrl-C interrupted')
-  gApplication.Terminate()
+  ROOT.gApplication.Terminate()
+
+#_______________________________________________________________________________
+def process_command(command):
+  pipe = ROOT.gSystem.OpenPipe(command, 'r')
+  line = ROOT.TString()
+  if line.Gets(pipe):
+    ROOT.gSystem.ClosePipe(pipe)
+    return int(line.Data())
+  else:
+    return 0
+
+#_______________________________________________________________________________
+def sleep(sec):
+  now = ROOT.TTimeStamp()
+  while not ROOT.gSystem.ProcessEvents():
+    if ROOT.TTimeStamp().GetSec() - now.GetSec() > sec:
+      return
+
+#_______________________________________________________________________________
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-b', '--batch', action='store_true', help='batch mode')
+  parsed, unparsed = parser.parse_known_args()
+  try:
+    import ROOT
+    monitor(parsed.batch)
+  except:
+    print(sys.exc_info())

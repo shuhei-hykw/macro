@@ -11,11 +11,11 @@ myname = os.path.basename(__file__).replace('.py', '')
 macro_dir = os.path.dirname(os.path.realpath(__file__))
 ana_type = None
 ana_dir = os.path.dirname(macro_dir)
-param_dir = ana_dir + '/param'
-conf_dir = param_dir + '/conf'
-root_dir = ana_dir + '/root/all'
-fig_dir = ana_dir + '/fig'
-output_dir = macro_dir + '/output'
+param_dir = os.path.join(ana_dir, 'param')
+conf_dir = os.path.join(param_dir, 'conf')
+root_dir = os.path.join(ana_dir, 'root/all')
+fig_dir = os.path.join(ana_dir, 'fig')
+output_dir = os.path.join(macro_dir, 'output')
 param_file = None
 root_file = None
 fig_file = None
@@ -42,10 +42,10 @@ def Load():
   ROOT.gROOT.SetBatch()
   ROOT.gStyle.SetOptStat(1111110)
   ROOT.gStyle.SetOptFit(1)
-  ROOT.gStyle.SetStatX(.90);
-  ROOT.gStyle.SetStatY(.90);
-  ROOT.gStyle.SetStatW(.30);
-  ROOT.gStyle.SetStatH(.20);
+  # ROOT.gStyle.SetStatX(.90);
+  # ROOT.gStyle.SetStatY(.90);
+  # ROOT.gStyle.SetStatW(.30);
+  # ROOT.gStyle.SetStatH(.20);
 
 #_______________________________________________________________________________
 if __name__ == '__main__':
