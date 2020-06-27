@@ -7,7 +7,7 @@ import sys
 import ROOT
 
 #_______________________________________________________________________________
-myname = os.path.basename(__file__).replace('.py', '')
+myname = os.path.basename(__file__).replace('.pyc', '').replace('.py', '')
 macro_dir = os.path.dirname(os.path.realpath(__file__))
 ana_type = None
 ana_dir = os.path.dirname(macro_dir)
@@ -23,7 +23,7 @@ output_file = None
 
 #_______________________________________________________________________________
 def Print():
-  print(myname + '.Print()' + '_'*68)
+  print((myname + '.Print() ' + '_'*80)[:80])
   print(' ana_type    : {}'.format(ana_type))
   print(' ana_dir     : {}'.format(ana_dir))
   print(' param_dir   : {}'.format(param_dir))
@@ -31,10 +31,14 @@ def Print():
   print(' root_dir    : {}'.format(root_dir))
   print(' fig_dir     : {}'.format(fig_dir))
   print(' output_dir  : {}'.format(output_dir))
-  print(' param_file  : {}'.format(os.path.basename(param_file)))
-  print(' root_file   : {}'.format(os.path.basename(root_file)))
-  print(' fig_file    : {}'.format(os.path.basename(fig_file)))
-  print(' output_file : {}'.format(os.path.basename(output_file)))
+  if param_file is not None:
+    print(' param_file  : {}'.format(os.path.basename(param_file)))
+  if root_file is not None:
+    print(' root_file   : {}'.format(os.path.basename(root_file)))
+  if fig_file is not None:
+    print(' fig_file    : {}'.format(os.path.basename(fig_file)))
+  if output_file is not None:
+    print(' output_file : {}'.format(os.path.basename(output_file)))
 
 #_______________________________________________________________________________
 def Load():
