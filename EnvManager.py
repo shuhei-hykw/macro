@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -50,6 +50,33 @@ def Load():
   # ROOT.gStyle.SetStatY(.90);
   # ROOT.gStyle.SetStatW(.30);
   # ROOT.gStyle.SetStatH(.20);
+
+#_______________________________________________________________________________
+def SetFigDir(dir_name):
+  global fig_dir
+  fig_dir = os.path.join(fig_dir, dir_name)
+
+#_______________________________________________________________________________
+def SetFigFile(key, fig_name):
+  global fig_dir
+  global fig_file
+  fig_dir = os.path.join(fig_dir, key)
+  fig_file = os.path.join(fig_dir, fig_name)
+
+#_______________________________________________________________________________
+def SetParamFile(key, param_name):
+  global param_dir
+  global param_file
+  param_dir = os.path.join(param_dir, key)
+  param_file = os.path.join(param_dir, param_name)
+
+#_______________________________________________________________________________
+def SetRootFile(bin_name, run_number):
+  global ana_type
+  global root_file
+  ana_type = bin_name
+  root_file = os.path.join(root_dir,
+                           'run{:05d}_{}.root'.format(run_number, bin_name))
 
 #_______________________________________________________________________________
 if __name__ == '__main__':
