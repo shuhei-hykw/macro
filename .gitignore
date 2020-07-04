@@ -8,8 +8,5 @@
 *.so
 *.pcm
 *.pyc
-*.C
-*.cc
-*.hh
 \#*
 output/
