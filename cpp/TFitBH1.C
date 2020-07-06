@@ -54,13 +54,13 @@ TFitBH1( const Int_t run_number, Int_t p=kKaon )
   const TString param_dir  = Form( "%s/param/HDPRM", ana_dir.Data() );
   const TString param_file = Form( "%s/HodoParam_%05d",
 				   param_dir.Data(), run_number );
-  const TString fig_dir    = Form( "%s/fig/hodo", ana_dir.Data() );
+  const TString fig_dir    = Form( "%s/fig/tune", ana_dir.Data() );
   const TString fig_file   = Form( "%s_%05d.pdf", __func__, run_number );
   const TString root_file  = Form( "run%05d_%s.root",
 				   run_number, ana_type.Data() );
   TFile* file = new TFile( Form("%s/%s", root_dir.Data(), root_file.Data()) );
   TTree* tree = dynamic_cast<TTree*>( file->Get("tree") );
-  const TString outname = Form( "%s/macro/output/hodo/%s_%05d",
+  const TString outname = Form( "%s/macro/output/tune/%s_%05d",
 				ana_dir.Data(), __func__, run_number );
   std::ifstream infile( param_file );
   std::ofstream outfile( outname );
