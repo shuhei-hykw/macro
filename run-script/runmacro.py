@@ -36,7 +36,7 @@ class RunMacro():
     self.__stdout = self.__devnull if quiet else sys.stdout
     self.__stderr = self.__devnull if quiet else sys.stderr
     self.__output = os.path.join(settings.tune_dir, output_path)
-    if 'TFitBH1' in self.__output:
+    if 'TFitBH1' in self.__output or 'TFitBAC' in self.__output:
       self.__param = os.path.join(settings.param_dir, 'HDPRM',
                                   'HodoParam_{:05d}'.format(run_number))
     else:
@@ -59,19 +59,20 @@ class RunMacro():
   #____________________________________________________________________________
   def run(self):
     if not self.__status or self.__process is not None:
-      print('RunMacro.run() failed, status = {}, process = {}'
-            .format(self.__status, self.__process))
-      print(self.__macro_path)
+      settings.logging.error('failed, status = {}, process = {}'
+                             .format(self.__status, self.__process))
+      settings.logging.error(self.__macro_path)
       return
-    print('RunMacro.run()',
-          os.path.basename(self.__macro_path), self.__run_number)
+    settings.logging.info('{} {}'
+                          .format(os.path.basename(self.__macro_path),
+                                  self.__run_number))
     try:
       self.__process = subprocess.Popen(self.__command, shell=True,
                                         stdout=self.__stdout,
                                         stderr=self.__stderr)
     except subprocess.CalledProcessError as e:
-      print('\n#E "{}" returned error code {}\n'
-            .format(e.cmd, e.returncode))
+      settings.logging.error('\n"{}" returned error code {}\n'
+                             .format(e.cmd, e.returncode))
     if self.__sync:
       self.wait()
 
@@ -80,12 +81,12 @@ class RunMacro():
     if (not self.__status or self.__param is None or
         not os.path.isfile(self.__param) or
         not os.path.isfile(self.__output)):
-      print('RunMacro.update() failed, status = {}'
-            .format(self.__status))
+      settings.logging.error('failed, status = {}'
+                             .format(self.__status))
       return
-    print('RunMacro.update() copy {} -> {}'
-          .format(os.path.basename(self.__output),
-                  os.path.basename(self.__param)))
+    settings.logging.info('copy {} -> {}'
+                          .format(os.path.basename(self.__output),
+                                  os.path.basename(self.__param)))
     shutil.copy2(self.__output, self.__param)
 
   #____________________________________________________________________________
@@ -97,10 +98,8 @@ class RunMacro():
 #______________________________________________________________________________
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('macro_path',
-                      help='target macro path')
-  parser.add_argument('run_number', type=int,
-                      help='run number')
+  parser.add_argument('macro_path', help='target macro path')
+  parser.add_argument('run_number', type=int, help='run number')
   parser.add_argument('-c', '--compile', action='store_true',
                       help='flag to compile macro')
   args = parser.parse_args()

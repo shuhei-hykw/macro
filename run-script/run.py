@@ -11,7 +11,7 @@ import runmacro
 import settings
 
 yml_data = None
-macro_set = ['TFitBH1']
+macro_set = ['TFitBH1', 'TFitBAC']
 
 #______________________________________________________________________________
 def nidles():
@@ -27,22 +27,22 @@ def nruns(runs):
 #______________________________________________________________________________
 def read(run_list_path):
   global yml_data
-  print('Read {}'.format(run_list_path))
+  settings.logging.info('{}'.format(run_list_path))
   with open(run_list_path, 'r') as f:
     yml_data = yaml.load(f.read())
 
 #______________________________________________________________________________
 def run(macro_key, compile=True, batch=True, interactive=False, quiet=True):
   if yml_data is None:
-    print('#E run list is not read')
+    settings.logging.error('run list is not read')
     return
   runs = []
   max_runs = int(nidles() - 1)
-  print('max runs =', max_runs)
+  settings.logging.info('max runs = {}'.format(max_runs))
   for run_number in yml_data['RUN']:
     while nruns(runs) >= max_runs:
       max_runs = int(nidles() - 1)
-      print('max runs =', max_runs)
+      settings.logging.info('max runs = {}'.format(max_runs))
       time.sleep(1)
     runs.append(runmacro.RunMacro(macro_key, run_number,
                                   quiet=True, sync=False))
@@ -55,10 +55,8 @@ def run(macro_key, compile=True, batch=True, interactive=False, quiet=True):
 #______________________________________________________________________________
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('run_list_path',
-                      help='target run list path')
-  parser.add_argument('macro_key', nargs='?',
-                      help='target macro head')
+  parser.add_argument('run_list_path', help='target run list path')
+  parser.add_argument('macro_key', nargs='?', help='target macro head')
   args = parser.parse_args()
   if args.macro_key is not None:
     macro_set = [args.macro_key]
@@ -67,4 +65,4 @@ if __name__ == '__main__':
     for key in macro_set:
       run(key)
   except KeyboardInterrupt:
-    print('\nQuit')
+    settings.logging.info('\nQuit')

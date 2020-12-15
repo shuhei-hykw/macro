@@ -26,15 +26,15 @@ namespace
 
 //_____________________________________________________________________________
 void
-TFitBH1( void )
+TFitBAC( void )
 {
-  std::cout << "Usage: TFitBH1.C(Int_t run_number)" << std::endl;
+  std::cout << "Usage: TFitBAC.C(Int_t run_number)" << std::endl;
   gApplication->Terminate();
 }
 
 //_____________________________________________________________________________
 void
-TFitBH1( const Int_t run_number, Int_t p=kKaon )
+TFitBAC( const Int_t run_number, Int_t p=kKaon )
 {
   gROOT->Reset();
   gStyle->SetOptStat(1110);
@@ -45,8 +45,8 @@ TFitBH1( const Int_t run_number, Int_t p=kKaon )
   gStyle->SetStatH(.20);
   // Configuration
   const Int_t canvas_x = 1200, canvas_y = 800;
-  const Int_t hmin = 300000, hmax = 500000;
-  const Int_t hbin = ( hmax - hmin ) / 10;
+  const Int_t hmin = 200000, hmax = 400000;
+  const Int_t hbin = ( hmax - hmin ) / 20;
   const Int_t width = 3000;
   const TString ana_type   = "Hodoscope";
   const TString ana_dir    = Form( "%s/k18analyzer/pro", std::getenv("HOME") );
@@ -77,99 +77,86 @@ TFitBH1( const Int_t run_number, Int_t p=kKaon )
 	    << "fig_file   = " << fig_file   << std::endl
 	    << TString('=', 80) << std::endl;
   enum e_AorT { kADC, kTDC,  kAorT };
-  enum e_UorD { kUP,  kDOWN, kUorD };
-  TString ud_str[kUorD]      = { "U", "D" };
-  TString branch_name[kUorD] = { "bh1ut", "bh1dt" };
-  TH1* h[kUorD][NumOfSegBH1];
-  TF1* f[kUorD][NumOfSegBH1];
-  for( Int_t ud=0; ud<kUorD; ++ud ){
-    for( Int_t i=0; i<NumOfSegBH1; ++i ){
-      h[ud][i] = new TH1D( Form( "%s_%d", branch_name[ud].Data(), i+1 ),
-			   Form( "BH1 TDC %d%s", i+1, ud_str[ud].Data() ),
-			   hbin, hmin, hmax );
-    }
+  TString branch_name = "bact";
+  TH1* h[NumOfSegBAC];
+  TF1* f[NumOfSegBAC];
+  for( Int_t i=0; i<NumOfSegBAC; ++i ){
+    h[i] = new TH1D( Form( "%s_%d", branch_name.Data(), i+1 ),
+		     Form( "BAC TDC %d", i+1 ),
+		     hbin, hmin, hmax );
   }
   // Event loop
   const UInt_t MaxDepth = 16;
-  Int_t    bh1nhits;
-  Double_t bh1ut[NumOfSegBH1][MaxDepth];
-  Double_t bh1dt[NumOfSegBH1][MaxDepth];
-  tree->SetBranchAddress( "bh1nhits", &bh1nhits );
-  tree->SetBranchAddress( "bh1ut", bh1ut );
-  tree->SetBranchAddress( "bh1dt", bh1dt );
+  Int_t    bacnhits;
+  Double_t bact[NumOfSegBAC][MaxDepth];
+  tree->SetBranchAddress( "bacnhits", &bacnhits );
+  tree->SetBranchAddress( "bact", bact );
   tree->SetBranchStatus( "*", false );
-  tree->SetBranchStatus( "bh1nhits", true );
-  tree->SetBranchStatus( "bh1ut", true );
-  tree->SetBranchStatus( "bh1dt", true );
+  tree->SetBranchStatus( "bacnhits", true );
+  tree->SetBranchStatus( "bact", true );
   TCut cut1;
   for( UInt_t iev=0, nev=tree->GetEntries(); iev<nev; ++iev ){
     if( iev%10000 == 0 )
       std::cout << "Event number = " << iev << std::endl;
     tree->GetEntry( iev );
-    for( UInt_t i=0; i<NumOfSegBH1; ++i ){
+    for( UInt_t i=0; i<NumOfSegBAC; ++i ){
       // if( i==0 || i==1 || i==9 || i==10 ){
       // 	if( p==kPion ){
       // 	  cut1 += "trigflag[17]>0 && trigflag[13]>0";
-      // 	  cut1 += "bact[0]>600 && bact[1]>600 && bh1nhits>0";
+      // 	  cut1 += "bact[0]>600 && bact[1]>600 && bacnhits>0";
       // 	} else {
-      // 	  cut1 += "bact[0]<=0 && bact[1]<=0 && bh1nhits==1";
+      // 	  cut1 += "bact[0]<=0 && bact[1]<=0 && bacnhits==1";
       // 	}
       // } else {
       // 	if ( p==kPion ){
       // 	  cut1 += "trigflag[17]>0 && trigflag[13]>0";
-      // 	  cut1 += "bact[0]>600 && bact[1]>600 && bh1nhits==1";
+      // 	  cut1 += "bact[0]>600 && bact[1]>600 && bacnhits==1";
       // 	} else {
-      // 	  cut1 += "bact[0]<=0 && bact[1]<=0 && bh1nhits==1";
+      // 	  cut1 += "bact[0]<=0 && bact[1]<=0 && bacnhits==1";
       // 	}
       // }
       for( UInt_t m=0; m<MaxDepth; ++m ){
-	if( bh1ut[i][m] > 0 )
-	  h[kUP][i]->Fill( bh1ut[i][m] );
-	if( bh1dt[i][m] > 0 )
-	  h[kDOWN][i]->Fill( bh1dt[i][m] );
+	if( bact[i][m] > 0 ) h[i]->Fill( bact[i][m] );
       }
     }
   }
   // Fitting
   TCanvas* c1 = new TCanvas( "c1","c1", canvas_x, canvas_y );
-  c1->Divide(6, 4);
-  std::cout << "- Start Fitting BH1 TDC" << std::endl;
-  Bool_t   fit_ok[kUorD][NumOfSegBH1];
-  Double_t param0[kUorD][NumOfSegBH1];
-  Double_t param1[kUorD][NumOfSegBH1];
-  for( Int_t ud=0; ud<kUorD; ++ud ){
-    std::cout << "Seg\tMean\tSigma" << std::endl;
-    for( Int_t i=0; i<NumOfSegBH1; ++i ){
-      c1->cd( i + ud*(NumOfSegBH1+1) + 1 );
-      if( h[ud][i]->Integral()==0 ) continue;
-      TString fname = Form("fit_%s_%d", branch_name[ud].Data(), i);
-      f[ud][i] = new TF1( fname, "gaus" );
-      Double_t center = h[ud][i]->GetBinCenter( h[ud][i]->GetMaximumBin() );
-      h[ud][i]->Fit( fname, "RQ", "", center-width, center+width );
-      Double_t Const  = f[ud][i]->GetParameter(0);
-      Double_t Mean   = f[ud][i]->GetParameter(1);
-      Double_t Sigma  = f[ud][i]->GetParameter(2);
-      for( Int_t ifit=0; ifit<3; ++ifit ){
-	h[ud][i]->Fit( fname, "RQ", "", Mean-Sigma*2, Mean+Sigma*2 );
-	Const  = f[ud][i]->GetParameter(0);
-	Mean   = f[ud][i]->GetParameter(1);
-	Sigma  = f[ud][i]->GetParameter(2);
-      }
-      param0[ud][i] = Mean;
-      //param1[ud][i] = 0.035;
-      fit_ok[ud][i] = ( Sigma < 5000. && h[ud][i]->Integral()>200 );
-      // if( nentries<1e4 ) fit_ok[ud][i] = false;
-      // if( nentries<1e5 ) fit_ok[ud][i] = false;
-      TString str = fit_ok[ud][i] ? "OK" : "NG";
-      Color_t col = fit_ok[ud][i] ? kBlue+1 : kRed+1;
-      TText *t = NewTText();
-      t->SetTextColor(col);
-      t->DrawText( 0.640, 0.360, str );
-      std::cout << std::setw(2) << i << ud_str[ud] << "\t"
-		<< Mean << "\t" << Sigma << std::endl;
-      h[ud][i]->GetXaxis()->SetRangeUser(Mean-10*Sigma, Mean+16*Sigma);
-      c1->Update();
+  // c1->Divide(6, 4);
+  std::cout << "- Start Fitting BAC TDC" << std::endl;
+  Bool_t   fit_ok[NumOfSegBAC];
+  Double_t param0[NumOfSegBAC];
+  Double_t param1[NumOfSegBAC];
+  std::cout << "Seg\tMean\tSigma" << std::endl;
+  for( Int_t i=0; i<NumOfSegBAC; ++i ){
+    c1->cd( i + 1 );
+    if( h[i]->Integral()==0 ) continue;
+    TString fname = Form("fit_%s_%d", branch_name.Data(), i);
+    f[i] = new TF1( fname, "gaus" );
+    Double_t center = h[i]->GetBinCenter( h[i]->GetMaximumBin() );
+    h[i]->Fit( fname, "RQ", "", center-width, center+width );
+    Double_t Const  = f[i]->GetParameter(0);
+    Double_t Mean   = f[i]->GetParameter(1);
+    Double_t Sigma  = f[i]->GetParameter(2);
+    for( Int_t ifit=0; ifit<3; ++ifit ){
+      h[i]->Fit( fname, "RQ", "", Mean-Sigma*2, Mean+Sigma*2 );
+      Const  = f[i]->GetParameter(0);
+      Mean   = f[i]->GetParameter(1);
+      Sigma  = f[i]->GetParameter(2);
     }
+    param0[i] = Mean;
+    fit_ok[i] = ( Sigma < 5000. && h[i]->Integral()>200 );
+    // if( nentries<1e4 ) fit_ok[i] = false;
+    // if( nentries<1e5 ) fit_ok[i] = false;
+    TString str = fit_ok[i] ? "OK" : "NG";
+    Color_t col = fit_ok[i] ? kBlue+1 : kRed+1;
+    TText *t = NewTText();
+    t->SetTextColor(col);
+    t->DrawText( 0.640, 0.360, str );
+    std::cout << std::setw(2) << i << "\t"
+	      << Mean << "\t" << Sigma << std::endl;
+    h[i]->GetXaxis()->SetRangeUser(Mean-10*Sigma, Mean+16*Sigma);
+    c1->Update();
   }
   c1->Print(Form("%s/%s", fig_dir.Data(), fig_file.Data()));
   // Make HodoParam
@@ -188,16 +175,17 @@ TFitBH1( const Int_t run_number, Int_t p=kKaon )
 			   &cid, &plane, &seg, &at, &ud, &p0, &p1 );
     auto nc = std::sscanf( line.Data(), "%s %s %s",
 			   buf1, buf2, buf3 );
-    if( np == 7 && cid == DetIdBH1 && at == kTDC ){
+    if( np == 7 && cid == DetIdBAC && at == kTDC ){
       TString ok;
-      if( fit_ok[ud][seg] && param0[ud][seg]!=0 ){
-	cp0 = param0[ud][seg];
+      if( fit_ok[seg] && param0[seg]!=0 ){
+	cp0 = param0[seg];
 	ok = "";
       } else {
 	cp0 = p0;
 	ok = "*";
       }
-      cp1 = p1;
+      // cp1 = p1;
+      cp1 = -0.0009390020;
       TString buf = Form( "%d\t%d\t%d\t%d\t%d\t%.3f\t%.10f",
 			  cid, plane, seg, at, ud, cp0, cp1 );
       std::cout << buf << "\t" << ok << std::endl;
